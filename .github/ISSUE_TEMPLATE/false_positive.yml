@@ -1,0 +1,27 @@
+name: False positive
+description: It flagged a file or package that's fine.
+labels: ["false positive"]
+body:
+  - type: markdown
+    attributes:
+      value: Don't paste tokens or secrets. Edit out private repo names and paths if they matter to you.
+  - type: textarea
+    id: finding
+    attributes:
+      label: What it reported
+      description: The line from the output.
+      placeholder: "FOUND  ~/code/app/package-lock.json pins keyv@6.0.0, a compromised version"
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it's harmless
+      description: What the file or package really is, with a link to its source if you have one.
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Scanner commit
+      description: "`git rev-parse --short HEAD` in your clone"

@@ -1,0 +1,26 @@
+name: Missed detection or new indicator
+description: Something it should catch, or a new variant to add.
+labels: ["detection"]
+body:
+  - type: markdown
+    attributes:
+      value: Don't attach malware or paste live samples. A link to a public write-up is enough.
+  - type: textarea
+    id: indicator
+    attributes:
+      label: What it should catch
+      description: "For example: a compromised package version missing from `packages.txt`, a new file name, hash or marker string, a new repo description."
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Public source
+      description: An advisory, a vendor report or a write-up that documents it.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Where it appears, and how to tell it apart from a normal file.

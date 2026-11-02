@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability in the scanner
+    url: https://github.com/huzaifa207/shai-hulud-scan/security/advisories/new
+    about: Privately, not as a public issue.
+  - name: Think you've been hit?
+    url: https://github.com/huzaifa207/shai-hulud-scan#if-it-finds-something
+    about: What to do first, before opening an issue.
