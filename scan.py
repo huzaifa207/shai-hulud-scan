@@ -62,7 +62,7 @@ MARKERS = (b"thebeautifulmarchoftime", b"thebeautifulsnadsoftime", b"IfYouBlockT
 EXFIL_DESCRIPTIONS = ("Shai-Hulud: Here We Go Again", "Sha1-Hulud: The Second Coming")
 LOCKFILES = {"package-lock.json", "npm-shrinkwrap.json", "yarn.lock", "pnpm-lock.yaml", "bun.lock"}
 MAX_FILE = 50 * 1024 * 1024
-calls = 0
+calls = branches = 0
 
 
 def spec_name(spec: str) -> str:
@@ -220,6 +220,7 @@ def blob(repo: str, sha: str) -> bytes:
 
 
 def scan_repo(repo: dict) -> list[dict]:
+    global branches
     name, rows = repo["full_name"], []
     if any(d in (repo.get("description") or "") for d in EXFIL_DESCRIPTIONS) or repo["name"].lower() == "shai-hulud":
         rows.append({"repo": name, "branch": None, "found": [
@@ -227,6 +228,7 @@ def scan_repo(repo: dict) -> list[dict]:
             "your machine or token was compromised"
         ]})
     for branch in pages(f"/repos/{name}/branches"):
+        branches += 1
         tree, _ = get(f"/repos/{name}/git/trees/{branch['commit']['sha']}?recursive=1")
         found = []
         for entry in (tree or {}).get("tree", []):
@@ -255,7 +257,7 @@ def main() -> None:
             found += more
             print(f"{root}: {counts['lockfiles']} lockfiles, {counts['packages']} installed packages checked.")
         print("\n".join(f"FOUND  {f}" for f in found) if found else "Nothing known found.")
-        result = found
+        result, summary = found, {"paths": args.paths}
     else:
         if args.repo:
             repo, _ = get(f"/repos/{args.repo}")
@@ -271,7 +273,8 @@ def main() -> None:
         for n, repo in enumerate(repos, 1):
             print(f"[{n}/{len(repos)}] {repo['full_name']}", file=sys.stderr)
             result += scan_repo(repo)
-        print(f"{len(repos)} repos checked.")
+        summary = {"repos": len(repos), "branches": branches}
+        print(f"{len(repos)} repos, {branches} branches checked.")
         for row in result:
             print(f"FOUND  {row['repo']}" + (f" {row['branch']} ({row['tip'][:7]})" if row["branch"] else ""))
             print("\n".join(f"       - {f}" for f in row["found"]))
@@ -280,7 +283,7 @@ def main() -> None:
         print(f"\n{calls} API requests.", file=sys.stderr)
     if args.out:
         with open(args.out, "w") as f:
-            json.dump(result, f, indent=2)
+            json.dump({**summary, "found": result}, f, indent=2)
     sys.exit(1 if result else 0)
 
 
